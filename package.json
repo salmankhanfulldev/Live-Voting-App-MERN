@@ -1,0 +1,18 @@
+{
+  "name": "livepoll",
+  "version": "1.0.0",
+  "description": "LivePoll",
+  "main": "index.js",
+  "scripts": {
+    "server": "npm start --prefix server",
+    "client": "npm run dev --prefix client",
+    "build": "npm run build --prefix client",
+    "start:prod": "npm run build && npm start --prefix server",
+    "install-all": "npm install && npm install --prefix server && npm install --prefix client"
+  },
+  "author": "salman khan",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^10.0.3"
+  }
+}

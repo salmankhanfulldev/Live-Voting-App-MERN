@@ -10,7 +10,7 @@ function HomePage() {
   useEffect(() => {
     const fetchPolls = async () => {
       try {
-        const res = await fetch('/api/polls');
+       const res = await fetch('https://livevotingmern-d4vq4k7n.b4a.run/api/polls');
         if (!res.ok) throw new Error('Failed to fetch polls');
         const data = await res.json();
         setPolls(data);

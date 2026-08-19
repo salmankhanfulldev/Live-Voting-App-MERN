@@ -117,32 +117,31 @@ const pollRoutes = require("./routes/polls.js");
 const connectDB = require("./db.js");
 const Poll = require("./models/Polls.js");
 
-// DB Connection
 connectDB();
 
 const app = express();
-const httpServer = http.createServer(app);
 
-// CORS Configuration - تمام کلائنٹ ریکویسٹس کی اجازت
-const corsOptions = {
+// 1. CORS کو سب سے پہلے لگائیں
+app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: false, // '*' کے ساتھ credentials false ہونا لازمی ہے
-};
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
-// SOCKET.IO CORS
+app.use(express.json());
+
+const httpServer = http.createServer(app);
+
+// 2. Socket.io کنفیگریشن
 const io = new Server(httpServer, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST"]
   },
+  transports: ["polling", "websocket"] // پہلے polling پھر websocket
 });
 
-// MIDDLEWARES
-app.use(cors(corsOptions));
-app.use(express.json());
-
-// Base Route (Health Check)
+// Base Route
 app.get("/", (req, res) => {
   res.json({ message: "LivePoll Server is Running Perfectly!" });
 });
@@ -150,17 +149,14 @@ app.get("/", (req, res) => {
 // REST APIs
 app.use("/api/polls", pollRoutes);
 
-// SOCKET.IO EVENTS
+// Socket Events
 io.on("connection", (socket) => {
   console.log(`Client Connected: ${socket.id}`);
 
-  // Join a PollRoom
   socket.on("joinPoll", (pollId) => {
     socket.join(pollId);
-    console.log(`Socket ${socket.id} joinRoom : ${pollId}`);
   });
 
-  // Handle Poll Submission by socket
   socket.on("submitVote", async ({ pollId, optionIndex }) => {
     try {
       const poll = await Poll.findById(pollId);
@@ -169,15 +165,12 @@ io.on("connection", (socket) => {
       poll.options[optionIndex].votes += 1;
       poll.totalVotes += 1;
       await poll.save();
-
-      // Broadcast the updated poll
       io.to(pollId).emit("pollUpdated", poll);
     } catch (error) {
       console.error("Error submitting vote:", error);
     }
   });
 
-  // Exit PollRoom
   socket.on("disconnect", () => {
     console.log(`Client Disconnected: ${socket.id}`);
   });

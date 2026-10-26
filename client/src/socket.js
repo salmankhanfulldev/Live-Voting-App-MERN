@@ -25,8 +25,12 @@
 
 import { io } from "socket.io-client";
 
-const socket = io("https://livevotingmern-d4vq4k7n.b4a.run", {
+const socket = io("http://localhost:5000", {
   transports: ["polling", "websocket"],
+  autoConnect: true,
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
 });
 
-export default socket;
+export default socket;

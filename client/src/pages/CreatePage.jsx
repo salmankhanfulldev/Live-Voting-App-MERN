@@ -48,7 +48,7 @@ function CreatePage() {
     setSubmitting(true);
     try {
       const res = await fetch(
-        "https://livevotingmern-d4vq4k7n.b4a.run/api/polls",
+        "/api/polls",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
